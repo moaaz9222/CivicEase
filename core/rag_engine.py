@@ -6,7 +6,7 @@ from langchain_community.vectorstores import Chroma
 
 # إعداد المسارات
 CHROMA_PATH = "chroma_db"
-DATA_PATH = "data/raw"  # مسار مجلد البيانات الخاص بك
+DATA_PATH = "data/"  # مسار مجلد البيانات الخاص بك
 
 
 def build_vector_db():

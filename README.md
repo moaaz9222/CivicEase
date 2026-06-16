@@ -1,1 +1,2 @@
 # welcome
+conda activate CivicEase
