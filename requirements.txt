@@ -5,3 +5,5 @@ crewai==0.22.5
 chromadb==0.4.24
 pypdf==4.1.0
 python-dotenv==1.0.0
+sentence-transformers>=2.2.2
+langchain-huggingface>=0.0.6
