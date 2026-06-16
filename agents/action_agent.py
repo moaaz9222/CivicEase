@@ -8,7 +8,6 @@ from typing import List, Optional
 load_dotenv()
 
 
-# 1. تعريف الـ Pydantic Schema ليتطابق بالملي مع الـ app.py
 class LocalOffice(BaseModel):
     name: str
     address: str
@@ -17,15 +16,12 @@ class LocalOffice(BaseModel):
 
 
 class ChecklistItem(BaseModel):
-    step_id: str = Field(
-        description="Globally unique ID. Format: [PROGRAM]_S[NUM] e.g., 'SNAP_S1'"
-    )
+    step_id: str = Field(description="Globally unique ID. e.g., 'SNAP_S1'")
     category: str = Field(
         description="Must be exactly: DOCUMENT, ACTION, APPOINTMENT, or LINK"
     )
     title: str
     description: str = Field(description="Keep under 25 words")
-    is_completed: bool = False
     resource_url: Optional[str] = None
     local_office: Optional[LocalOffice] = None
 
@@ -46,7 +42,7 @@ class SupportContact(BaseModel):
 
 
 class ActionPlanOutput(BaseModel):
-    action_plan_title: str = "Your Benefits Action Plan"
+    action_plan_title: str = Field(default="Your Benefits Action Plan")
     urgency_actions: List[str] = Field(default=[])
     benefit_action_blocks: List[BenefitActionBlock]
     next_best_action: str
@@ -54,47 +50,48 @@ class ActionPlanOutput(BaseModel):
 
 
 def run_agent_3(profile_data: dict, benefits_data: list) -> dict:
-    """
-    يأخذ تقييم الأهلية من Agent 2 ويحوله إلى خطة عمل تنفيذية ومنظمة للواجهة.
-    """
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama3-8b-8192",
+        model_name="llama-3.1-8b-instant",
         temperature=0,
     )
     structured_llm = llm.with_structured_output(ActionPlanOutput)
 
-    # البرومبت الاحترافي الخاص بك مع حماية الـ Unique Key
     system_prompt = """
-    You are the Action Plan Architect for CivicEase AI. You receive 
-    the benefits assessment array from Agent 2 and transform it into 
-    a concrete, step-by-step action roadmap that a user can immediately 
-    begin following.
-
+    You are the Action Plan Architect for CivicEase AI.
     RULES:
-    1. Rank benefits by priority_rank: Order by qualification_likelihood DESC (HIGH first, UNLIKELY last).
-    2. Every checklist item MUST have a direct .gov URL where one exists. Never link to third-party aggregators.
-    3. Keep step descriptions under 25 words — users are often on mobile or in stressful situations.
-    4. CRITICAL: Every 'step_id' MUST be globally unique. Use the format: [PROGRAM_ACRONYM]_S[NUMBER] (e.g., 'SNAP_S1', 'SNAP_S2', 'WIC_S1').
-    5. urgency_actions: Only if urgency_flag in the profile is True, prepend 2-3 immediate steps (e.g., emergency food pantry locator).
-    6. Never fabricate phone numbers, addresses, or URLs. Use placeholder format [VERIFY: source] if uncertain.
+    1. Rank benefits by priority_rank: Order by qualification_likelihood DESC.
+    2. Every checklist item MUST have a direct .gov URL where one exists.
+    3. Keep step descriptions under 25 words.
+    4. CRITICAL: Every 'step_id' MUST be globally unique (e.g., 'SNAP_S1').
+    5. urgency_actions: Only if urgency_flag is True, prepend immediate steps.
     """
 
-    human_template = """
-    User Profile Data:
-    {profile}
-
-    Benefits Assessment (from Agent 2):
-    {benefits}
-    """
+    human_template = "Profile Data:\n{profile}\n\nBenefits:\n{benefits}"
 
     prompt = ChatPromptTemplate.from_messages(
         [("system", system_prompt), ("human", human_template)]
     )
 
     chain = prompt | structured_llm
-    result = chain.invoke(
-        {"profile": str(profile_data), "benefits": str(benefits_data)}
-    )
 
-    return result.model_dump()
+    try:
+        result = chain.invoke(
+            {"profile": str(profile_data), "benefits": str(benefits_data)}
+        )
+        if not result:
+            raise ValueError("Empty Output")
+        return result.model_dump()
+
+    except Exception as e:
+        print(f"⚠️ Error in Agent 3: {e}")
+        # خطة طوارئ لو النموذج علق عشان الواجهة ماتقفلش
+        return {
+            "action_plan_title": "Your Benefits Action Plan",
+            "urgency_actions": ["Please contact 2-1-1 for immediate assistance."],
+            "benefit_action_blocks": [],
+            "next_best_action": "System load is high, but you can still apply through local offices.",
+            "support_contacts": [
+                {"name": "Emergency Hotline", "number": "2-1-1", "available": "24/7"}
+            ],
+        }

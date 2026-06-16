@@ -25,17 +25,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ── Custom CSS (Safe & High Contrast) ────────────────────────────────────────
+# ── Custom CSS (Native Streamlit Look with Transparent Elements) ─────────────
 st.markdown(
     """
 <style>
-    /* Global safe overrides */
-    .stApp { background-color: #F8FAFC; }
-    
     /* Header */
     .civicease-header {
         background: linear-gradient(135deg, #1B4F72, #2E86C1);
-        color: white !important;
+        color: white;
         padding: 1.2rem 2rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
@@ -45,10 +42,9 @@ st.markdown(
     }
     .civicease-header div { color: white !important; }
     
-    /* Chat bubbles */
+    /* Chat bubbles (Transparent to adapt to Dark/Light mode) */
     .chat-user {
-        background: #D6EAF8;
-        color: #1B4F72 !important;
+        background-color: rgba(46, 134, 193, 0.15);
         border-radius: 16px 16px 4px 16px;
         padding: 0.75rem 1rem;
         margin: 0.5rem 0;
@@ -57,15 +53,12 @@ st.markdown(
         font-size: 0.95rem;
     }
     .chat-ai {
-        background: #FFFFFF;
-        color: #1E293B !important;
-        border: 1px solid #D5D8DC;
+        background-color: rgba(128, 128, 128, 0.1);
         border-radius: 16px 16px 16px 4px;
         padding: 0.75rem 1rem;
         margin: 0.5rem 0;
         max-width: 85%;
         font-size: 0.95rem;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
     
     /* Confidence badges */
@@ -75,22 +68,17 @@ st.markdown(
     
     /* Benefit card */
     .benefit-card {
-        background: white;
+        background-color: rgba(128, 128, 128, 0.05);
         border-left: 5px solid #2E86C1;
-        color: #1E293B !important;
         border-radius: 8px;
         padding: 1rem 1.2rem;
         margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     }
-    .benefit-card strong { color: #0F172A !important; }
     
     /* Disclaimers */
     .disclaimer-banner {
-        background: #FEF9E7;
-        border: 1px solid #F9E79F;
+        background-color: rgba(241, 196, 15, 0.1);
         border-left: 5px solid #F1C40F;
-        color: #7D6608 !important;
         border-radius: 8px;
         padding: 0.8rem 1rem;
         font-size: 0.85rem;
@@ -98,9 +86,8 @@ st.markdown(
     }
     
     .urgency-banner {
-        background: #FDEDEC;
+        background-color: rgba(231, 76, 60, 0.1);
         border-left: 5px solid #E74C3C;
-        color: #922B21 !important;
         border-radius: 8px;
         padding: 0.8rem 1rem;
         font-weight: 600;
@@ -109,25 +96,18 @@ st.markdown(
     
     /* Checklist */
     .checklist-item {
-        border-bottom: 1px solid #EBF5FB;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
         padding: 0.6rem 0;
         font-size: 0.92rem;
-        color: #1E293B !important;
     }
     
     .section-label {
         font-size: 0.78rem;
         font-weight: 700;
         letter-spacing: 0.08em;
-        color: #34495E !important;
         text-transform: uppercase;
         margin: 1.2rem 0 0.4rem 0;
-    }
-    
-    /* Fix Input Box color */
-    .stTextArea textarea {
-        color: #1E293B !important;
-        background-color: #FFFFFF !important;
+        opacity: 0.7;
     }
     
     #MainMenu {visibility: hidden;}
@@ -214,10 +194,10 @@ def render_dashboard(action_plan: dict, benefits: list):
         <div class='benefit-card'>
             <strong>{b["benefit_name"]}</strong> &nbsp;
             <span class='{badge_class}'>{lk}</span> &nbsp;
-            <span style='font-size:0.82rem;color:#626567;'>
+            <span style='font-size:0.82rem; opacity: 0.8;'>
                 Confidence: {conf_pct}%{est_text}
             </span><br/>
-            <span style='font-size:0.88rem;color:#444;margin-top:4px;display:block;'>
+            <span style='font-size:0.88rem; margin-top:4px; display:block;'>
                 {b["plain_language_summary"]}
             </span>
         </div>
@@ -270,7 +250,7 @@ def render_dashboard(action_plan: dict, benefits: list):
                     st.session_state.checklist_state[sid] = checked
                 with col_text:
                     style = (
-                        "text-decoration:line-through;color:#AAB7B8;" if checked else ""
+                        "text-decoration:line-through; opacity: 0.5;" if checked else ""
                     )
                     link_html = ""
                     if item.get("resource_url"):
@@ -279,7 +259,7 @@ def render_dashboard(action_plan: dict, benefits: list):
                     st.markdown(
                         f"<div class='checklist-item' style='{style}'>"
                         f"{icon} <strong>{item['title']}</strong>{link_html}<br/>"
-                        f"<span style='color:#5D6D7E;font-size:0.87rem;'>{item['description']}</span></div>",
+                        f"<span style='font-size:0.87rem; opacity: 0.8;'>{item['description']}</span></div>",
                         unsafe_allow_html=True,
                     )
 
@@ -464,7 +444,7 @@ with col_dash:
     if st.session_state.action_plan is None:
         st.markdown(
             """
-        <div style='text-align:center;padding:3rem 1rem; color:#AAB7B8;border:2px dashed #D5D8DC; border-radius:12px;'>
+        <div style='text-align:center;padding:3rem 1rem; opacity:0.6; border:2px dashed; border-radius:12px;'>
             <div style='font-size:3rem;'>🗂️</div>
             <div style='font-size:1rem;margin-top:0.5rem;'>
                 Your personalized action plan will appear here<br/>

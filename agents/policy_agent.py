@@ -12,9 +12,13 @@ load_dotenv()
 # 1. بناء الهيكل المطابق تماماً لطلبك وللواجهة
 class SourceCitation(BaseModel):
     document_title: str
-    page_number: int
+    page_number: Optional[int] = Field(
+        default=None, description="Page number if available, otherwise null"
+    )
     excerpt_summary: str
-    url: str
+    url: Optional[str] = Field(
+        default=None, description="URL if available, otherwise null"
+    )
 
 
 class BenefitAssessment(BaseModel):
@@ -49,7 +53,7 @@ def run_agent_2(profile_data: dict) -> list:
     # تهيئة LLaMA 3 عبر Groq
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama3-8b-8192",
+        model_name="llama-3.1-8b-instant",
         temperature=0,
     )
     structured_llm = llm.with_structured_output(Agent2Output)

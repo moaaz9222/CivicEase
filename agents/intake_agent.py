@@ -50,7 +50,7 @@ def run_agent_1(user_text: str) -> dict:
     # 2. تهيئة نموذج LLaMA 3 السريع والمجاني عبر Groq
     llm = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama3-8b-8192",  # يمكنك استخدام llama3-70b-8192 لأداء أذكى
+        model_name="llama-3.1-8b-instant",  # يمكنك استخدام llama3-70b-8192 لأداء أذكى
         temperature=0,  # صفر لضمان الدقة وعدم التأليف
     )
 
@@ -75,7 +75,7 @@ You must ALWAYS respond with a valid JSON object and NOTHING else.
 Do NOT wrap the JSON in markdown code blocks (e.g., no ```json).
 No preamble, no explanation, no conversational text.
 
-{
+{{
   "location": "...",
   "monthly_income": 0.0,
   "family_size": 0,
@@ -85,7 +85,7 @@ No preamble, no explanation, no conversational text.
   "urgency_flag": false,
   "missing_fields": [],
   "clarification_needed": "..." 
-}
+}}
 
 STRICT RULES:
 1. MISSING DATA: Never assume or hallucinate income, family size, or ages. If any value is missing from the user's prompt, you MUST set its value to `null` (not the string "null" or "not provided", but the JSON null type).
