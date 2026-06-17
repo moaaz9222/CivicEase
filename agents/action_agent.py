@@ -65,6 +65,8 @@ def run_agent_3(profile_data: dict, benefits_data: list) -> dict:
     3. Keep step descriptions under 25 words.
     4. CRITICAL: Every 'step_id' MUST be globally unique (e.g., 'SNAP_S1').
     5. urgency_actions: Only if urgency_flag is True, prepend immediate steps.
+    6. CRITICAL: You MUST include 'local_office' details (name, address, phone, hours) for at least one physical 'ACTION' or 'APPOINTMENT' step per benefit. Never leave it null.
+    7. Ensure you provide 'support_contacts' at the bottom of the plan.
     """
 
     human_template = "Profile Data:\n{profile}\n\nBenefits:\n{benefits}"
@@ -85,7 +87,6 @@ def run_agent_3(profile_data: dict, benefits_data: list) -> dict:
 
     except Exception as e:
         print(f"⚠️ Error in Agent 3: {e}")
-        # خطة طوارئ لو النموذج علق عشان الواجهة ماتقفلش
         return {
             "action_plan_title": "Your Benefits Action Plan",
             "urgency_actions": ["Please contact 2-1-1 for immediate assistance."],
