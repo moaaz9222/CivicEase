@@ -1,0 +1,39 @@
+﻿* { scrollbar-width: thin; scrollbar-color: rgba(34, 211, 238, 0.45) rgba(15, 23, 42, 0.2); }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.custom-scroll::-webkit-scrollbar { width: 10px; }
+.custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.2); border-radius: 999px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.35); border-radius: 999px; border: 2px solid rgba(15, 23, 42, 0.45); }
+.font800 { font-weight: 800; }
+.message-ai, .message-user { display: flex; gap: 0.75rem; align-items: flex-start; }
+.message-user { justify-content: flex-end; }
+.avatar-ai, .avatar-user { display: grid; height: 2rem; width: 2rem; flex: none; place-items: center; border-radius: 999px; }
+.bubble-ai, .bubble-user { max-width: 86%; border-radius: 1.2rem; padding: 0.9rem 1rem; font-size: 0.9rem; line-height: 1.65; }
+.bubble-ai { border-top-left-radius: 0.35rem; border: 1px solid rgba(148, 163, 184, 0.16); background: rgba(255, 255, 255, 0.055); color: rgb(226, 232, 240); }
+.bubble-user { border-top-right-radius: 0.35rem; background: linear-gradient(135deg, rgba(34, 211, 238, 0.92), rgba(56, 189, 248, 0.9)); color: #07111f; font-weight: 600; }
+.loader { width: 2.4rem; height: 2.4rem; border-radius: 999px; border: 3px solid rgba(34, 211, 238, 0.18); border-top-color: #22D3EE; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.reveal { animation: reveal 0.28s ease-out both; }
+@keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.metric-card { position: relative; overflow: hidden; transition: transform 180ms ease, border-color 180ms ease, background 180ms ease; }
+.metric-card::before { content: ""; position: absolute; inset: -1px; background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), transparent 42%); opacity: 0; transition: opacity 180ms ease; pointer-events: none; }
+.metric-card:hover { transform: translateY(-2px); border-color: rgba(34, 211, 238, 0.38); background: rgba(255, 255, 255, 0.055); }
+.metric-card:hover::before { opacity: 1; }
+.metric-card > * { position: relative; z-index: 1; }
+.empty-orbit { position: relative; display: grid; width: 8.5rem; height: 8.5rem; place-items: center; color: #22D3EE; }
+.empty-orbit-core { position: relative; z-index: 2; display: grid; width: 5.5rem; height: 5.5rem; place-items: center; border-radius: 2rem; border: 1px solid rgba(34, 211, 238, 0.34); background: radial-gradient(circle at 35% 20%, rgba(34, 211, 238, 0.22), rgba(34, 211, 238, 0.08)); box-shadow: 0 0 42px rgba(34, 211, 238, 0.18), inset 0 0 22px rgba(34, 211, 238, 0.08); }
+.empty-orbit-ring { position: absolute; inset: 0.25rem; border-radius: 999px; border: 1px solid rgba(34, 211, 238, 0.18); animation: orbitPulse 2.6s ease-out infinite; }
+.empty-orbit-ring-delay { inset: 1.05rem; animation-delay: 0.7s; border-color: rgba(56, 189, 248, 0.16); }
+@keyframes orbitPulse { 0% { transform: scale(0.84); opacity: 0.28; } 50% { opacity: 0.8; } 100% { transform: scale(1.06); opacity: 0.12; } }
+.phase-icon { box-shadow: inset 0 0 18px rgba(34, 211, 238, 0.06); }
+.pro-tip { box-shadow: 0 0 28px rgba(251, 191, 36, 0.08), inset 0 0 18px rgba(251, 191, 36, 0.04); }
+.citation-accordion summary::-webkit-details-marker { display: none; }
+.citation-accordion[open] .citation-chevron { transform: rotate(180deg); }
+.citation-chevron { transition: transform 180ms ease; }
+.citation-pill { box-shadow: 0 0 18px rgba(34, 211, 238, 0.06); }
+.metric-card strong { text-shadow: 0 0 18px rgba(34, 211, 238, 0.16); }
+.empty-orbit-core i { filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.32)); }
+.phase-icon i { filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.18)); }
+.pro-tip i { filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.32)); }
+.citation-pill:focus-visible { outline: 2px solid rgba(34, 211, 238, 0.72); outline-offset: 3px; }
+.avatar-badge { box-shadow: 0 0 18px rgba(34, 211, 238, 0.10), inset 0 0 14px rgba(15, 23, 42, 0.72); }
+.message-user .avatar-badge { box-shadow: inset 0 0 14px rgba(15, 23, 42, 0.76); }
