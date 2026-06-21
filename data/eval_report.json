@@ -1,18 +1,18 @@
 {
   "avg_extraction_accuracy": 100.0,
-  "avg_precision": 100.0,
-  "avg_recall": 83.33333333333333,
-  "avg_f1": 90.9090909090909,
-  "cot_completeness": 60.0,
+  "avg_precision": 46.666666666666664,
+  "avg_recall": 56.666666666666664,
+  "avg_f1": 51.18279569892473,
+  "cot_completeness": 100.0,
   "total_hallucinations": 0,
   "individual_results": [
     {
       "id": 1,
       "name": "Low-Income Family (Texas)",
       "extraction_score": 100.0,
-      "precision": 1.0,
+      "precision": 0.5,
       "recall": 0.5,
-      "f1_score": 66.66666666666666,
+      "f1_score": 50.0,
       "cot_verified": true,
       "hallucinations": 0
     },
@@ -23,26 +23,26 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 100.0,
-      "cot_verified": false,
+      "cot_verified": true,
       "hallucinations": 0
     },
     {
       "id": 3,
       "name": "High-Income Family (California)",
       "extraction_score": 100.0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1_score": 100.0,
-      "cot_verified": false,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "cot_verified": true,
       "hallucinations": 0
     },
     {
       "id": 4,
       "name": "Single Parent with Infant (New York)",
       "extraction_score": 100.0,
-      "precision": 1.0,
-      "recall": 0.6666666666666666,
-      "f1_score": 80.0,
+      "precision": 0.3333333333333333,
+      "recall": 0.3333333333333333,
+      "f1_score": 33.33333333333333,
       "cot_verified": true,
       "hallucinations": 0
     },
@@ -50,9 +50,9 @@
       "id": 5,
       "name": "Crisis / Zero-Income (Ohio)",
       "extraction_score": 100.0,
-      "precision": 1.0,
+      "precision": 0.5,
       "recall": 1.0,
-      "f1_score": 100.0,
+      "f1_score": 66.66666666666666,
       "cot_verified": true,
       "hallucinations": 0
     }

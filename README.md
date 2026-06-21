@@ -80,7 +80,7 @@ CivicEase AI was refined and locked against a rigorous evaluation suite containi
 | Metric | Baseline | Final Stable | Change |
 |---|---|---|---|
 | **Intake Extraction Accuracy** | 85.0% | **100.0%** | **+15.0%** (Perfect extraction) |
-| **System F1-Score** | 31.8% | **57.9%** | **+82.0%** (Substantial match improvement) |
+| **System F1-Score** | 31.8% | **51.2%** | **+61.0%** (Substantial match improvement) |
 | **Chain-of-Thought Completeness** | 60.0% | **100.0%** | **+67.0%** (All reasoning steps fully structured) |
 | **Verified Hallucinations** | 0.0% | **0.0%** | **Maintained at Zero** |
 
