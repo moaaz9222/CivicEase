@@ -206,3 +206,11 @@ CivicEase-main/
 └── templates/
     └── index.html                 # Flask dashboard template
 ```
+
+
+## Team
+This project was developed by:
+* **Yossif Ahmed** (yossifmesalam81@gmail.com)
+* **Moaaz Yasser** (moaazyasser60@gmail.com)
+
+We would like to acknowledge the initial contributions of our team members during the qualification phase.
