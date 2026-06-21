@@ -134,7 +134,10 @@ def get_retriever(metadata_filter: Optional[dict] = None):
         raise FileNotFoundError(f"Chroma database not found at '{CHROMA_PATH}'. Run build_vector_db first.")
 
     db = Chroma(persist_directory=str(CHROMA_PATH), embedding_function=_embedding_function())
-    search_kwargs: dict = {"k": 4}
+    # k=5: balanced retrieval — better recall than k=4 while avoiding the noise
+    # amplification of k=6. The context-filtering step in policy_agent.py handles
+    # quality control, so a moderate k is the right stable choice.
+    search_kwargs: dict = {"k": 5}
 
     clean_filter = {k: v for k, v in (metadata_filter or {}).items() if v}
     if clean_filter:

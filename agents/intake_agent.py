@@ -138,14 +138,15 @@ Required JSON shape:
 }}
 
 Strict rules:
-1. Never infer income, family size, location, or ages when absent.
-2. If location, monthly_income, or family_size is missing, add that field name to missing_fields.
+1. Never infer income or specific ages when absent. For family_size, see rule 9 below.
+2. If location, monthly_income, or family_size is missing (and rule 9 does not apply), add that field name to missing_fields.
 3. If income is unknown, unstable, a range, or conflicting, set monthly_income to the exact string "None" and ask for clarification.
 4. If yearly, weekly, or hourly income is single and unambiguous, convert it to monthly income.
 5. specific_needs may only contain: food_assistance, childcare_support, education_training, healthcare, housing, other.
 6. Strip personally identifiable information. Keep only eligibility-relevant location such as city, county, or state.
 7. If any essential field is missing, clarification_needed must be exactly one friendly sentence. Otherwise it must be null.
 8. If the user explicitly states they have no income, earn zero dollars, have no monthly income, or are unemployed, set monthly_income to "0". Do not set it to "None".
+9. If the user refers to themselves in first-person singular (I, me, my) with NO mention of a partner, spouse, children, roommates, or other household members, set family_size to 1. Do NOT add family_size to missing_fields in this case.
 """
 
 
@@ -188,6 +189,46 @@ def _complete_missing_fields(profile: IntakeProfile) -> IntakeProfile:
     return profile
 
 
+def _infer_solo_individual(profile: IntakeProfile, user_text: str) -> IntakeProfile:
+    """
+    Python-level fallback for Rule 9: when the LLM fails to infer family_size=1
+    for a clearly solo individual, this function does it programmatically.
+
+    Triggered only when family_size is still None after LLM parsing AND the
+    user text contains solo-living signals with no household-member signals.
+    This is generalizable — it reads from user text, not hardcoded profiles.
+    """
+    if profile.family_size is not None:
+        return profile  # Already determined — no action needed
+
+    text_lower = user_text.lower()
+
+    # Words that imply other people in the household
+    household_signals = [
+        "children", "kids", "child", "spouse", "partner", "wife", "husband",
+        "family", "roommate", "daughter", "son", "baby", "infant", "toddler",
+        "we ", "our ", "us ",
+    ]
+    # Phrases that imply a single individual living alone
+    solo_signals = [
+        "living in my car", "living alone", "by myself", "on my own",
+        "i am alone", "i'm alone", "just me", "only me", "i live alone",
+        "living in car", "sleeping in my car", "no one else",
+    ]
+
+    has_others = any(w in text_lower for w in household_signals)
+    has_solo   = any(phrase in text_lower for phrase in solo_signals)
+
+    if has_solo and not has_others:
+        profile.family_size = 1
+        profile.missing_fields = [f for f in profile.missing_fields if f != "family_size"]
+        if not profile.missing_fields:
+            profile.clarification_needed = None
+        print("  [IntakeAgent] Solo-individual inference: family_size set to 1")
+
+    return profile
+
+
 def run_agent_1(user_text: str) -> dict:
     if not os.getenv("GROQ_API_KEY"):
         return _intake_fallback("The intake service is not configured yet. Please try again later.")
@@ -206,6 +247,8 @@ def run_agent_1(user_text: str) -> dict:
         response = (prompt | llm).invoke({"user_input": str(user_text)[:8000]})
         payload = _extract_json_object(response.content)
         profile = _complete_missing_fields(IntakeProfile.model_validate(payload))
+        # Python-level fallback: infer family_size=1 for clearly solo individuals
+        profile = _infer_solo_individual(profile, str(user_text))
         return profile.model_dump()
     except (json.JSONDecodeError, ValidationError, ValueError):
         return _intake_fallback(

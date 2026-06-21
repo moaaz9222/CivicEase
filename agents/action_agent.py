@@ -70,6 +70,94 @@ def _llm() -> ChatGroq:
     )
 
 
+import re
+from urllib.parse import urlparse
+
+
+def _apply_guardrails(action_plan: dict, policy_matches: dict) -> dict:
+    # Guardrail 1: Strict Program Alignment
+    allowed_benefits = {
+        match.get("benefit_name", "").strip().lower() 
+        for match in policy_matches.get("matches", [])
+    }
+    
+    filtered_blocks = []
+    for block in action_plan.get("benefit_action_blocks", []):
+        name = block.get("benefit_name", "").strip().lower()
+        if name in allowed_benefits:
+            filtered_blocks.append(block)
+    action_plan["benefit_action_blocks"] = filtered_blocks
+    
+    # Collect all valid URLs from Policy Agent's citations
+    valid_citation_urls = set()
+    for match in policy_matches.get("matches", []):
+        for citation in match.get("source_citations", []):
+            url = citation.get("url")
+            if url:
+                valid_citation_urls.add(url.strip().lower())
+                
+    # Trusted TLDs whitelist
+    trusted_tlds = (".gov", ".org", ".edu")
+    
+    # Guardrail 2: Certainty Mitigation
+    mitigations = {
+        r"\byou are approved\b": "you may be eligible",
+        r"\byou are guaranteed\b": "you may qualify",
+        r"\bwill receive\b": "may receive",
+        r"\bwill get\b": "may qualify for",
+        r"\bguaranteed to receive\b": "potentially eligible to receive",
+        r"\bdefinitely qualify\b": "likely qualify",
+    }
+    
+    def sanitize_text(text: str) -> str:
+        if not text:
+            return text
+        sanitized = text
+        for pattern, replacement in mitigations.items():
+            sanitized = re.sub(pattern, replacement, sanitized, flags=re.IGNORECASE)
+        return sanitized
+
+    if "next_best_action" in action_plan:
+        action_plan["next_best_action"] = sanitize_text(action_plan["next_best_action"])
+        
+    if "urgency_actions" in action_plan:
+        action_plan["urgency_actions"] = [
+            sanitize_text(action) for action in action_plan["urgency_actions"]
+        ]
+
+    for block in action_plan.get("benefit_action_blocks", []):
+        block["pro_tip"] = sanitize_text(block.get("pro_tip", ""))
+        if block.get("deadline_warning"):
+            block["deadline_warning"] = sanitize_text(block["deadline_warning"])
+            
+        for item in block.get("checklist", []):
+            item["title"] = sanitize_text(item.get("title", ""))
+            item["description"] = sanitize_text(item.get("description", ""))
+            
+            # Guardrail 3: URL Whitelisting & Validation
+            url = item.get("resource_url")
+            if url:
+                url_str = url.strip()
+                url_lower = url_str.lower()
+                
+                is_valid = False
+                if url_lower in valid_citation_urls:
+                    is_valid = True
+                else:
+                    try:
+                        parsed = urlparse(url_str)
+                        hostname = parsed.hostname
+                        if hostname and hostname.lower().endswith(trusted_tlds):
+                            is_valid = True
+                    except Exception:
+                        pass
+                
+                if not is_valid:
+                    item["resource_url"] = None
+
+    return action_plan
+
+
 def run_agent_3(profile_data: dict, policy_matches: dict) -> dict:
     benefits_list = policy_matches.get("matches", []) if isinstance(policy_matches, dict) else []
     if not benefits_list:
@@ -143,7 +231,7 @@ Strict instructions:
 
         data = json.loads(raw_content.strip())
         validated = ActionPlanOutput.model_validate(data)
-        return validated.model_dump()
+        return _apply_guardrails(validated.model_dump(), policy_matches)
 
     except Exception:
         return _fallback_action_plan(bool(profile_data.get("urgency_flag")))
