@@ -9,11 +9,13 @@ from flask import Flask, jsonify, render_template, request
 from agents.action_agent import run_agent_3
 from agents.intake_agent import run_agent_1
 from agents.policy_agent import run_agent_2
+from core.background_ingestion import start_background_ingestion_scheduler
 
 load_dotenv()
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger(__name__)
+_INGESTION_SCHEDULER = None
 
 MAX_MESSAGE_CHARS = 6000
 MAX_CONTEXT_CHARS = 14000
@@ -24,6 +26,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", os.urandom(24).hex())
     app.config["JSON_SORT_KEYS"] = False
+    _maybe_start_background_ingestion()
 
     @app.get("/")
     def index():
@@ -90,6 +93,15 @@ def create_app() -> Flask:
         return jsonify({"status": "ok"})
 
     return app
+
+
+def _maybe_start_background_ingestion() -> None:
+    global _INGESTION_SCHEDULER
+    if _INGESTION_SCHEDULER is not None:
+        return
+    if os.getenv("FLASK_DEBUG", "false").lower() == "true" and os.getenv("WERKZEUG_RUN_MAIN") != "true":
+        return
+    _INGESTION_SCHEDULER = start_background_ingestion_scheduler()
 
 
 def _normalize_messages(raw_messages: Any) -> list[dict[str, str]]:

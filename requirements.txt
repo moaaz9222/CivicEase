@@ -23,6 +23,7 @@ pydantic>=2.6,<3
 
 # ── Environment & Utilities ───────────────────────────────────────────
 python-dotenv>=1.0.0
+APScheduler>=3.10,<4
 
 # ── Legacy Streamlit UI (optional — only needed for ui/app.py) ────────
 # Uncomment if you want to run the legacy Streamlit interface:
