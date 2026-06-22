@@ -47,7 +47,7 @@ graph TD
 
 **Agent 1: Intake Specialist** (`agents/intake_agent.py`)
 
-Extracts eligibility-relevant variables from the conversation, including location, household size, income, age signals, urgency, and specific needs. If required information is missing, the pipeline pauses and asks a clarification question instead of guessing.
+Extracts eligibility-relevant variables from the conversation, including location, household size, income, age signals, urgency, and specific needs. If required information is missing, the pipeline pauses and asks a clarification question instead of guessing. A Python-level solo-individual fallback (`_infer_solo_individual`) supplements LLM extraction: when user text contains unambiguous solo-living signals (such as "living alone" or "just me") and no household-member signals, `family_size` is programmatically set to 1 without relying on the LLM.
 
 **Agent 2: Policy Analyst** (`agents/policy_agent.py`)
 
@@ -138,6 +138,8 @@ If the model's own reasoning states that the user is ineligible, over the income
 
 This guard does not hard-code income tables. It enforces consistency between retrieved policy evidence, model reasoning, and final output.
 
+The evaluation taxonomy also includes state-branded aliases for programs in states such as California, New York, Florida, Ohio, and Georgia, reducing false hallucination flags when the model uses official regional benefit names.
+
 ## Impact and Verification
 
 Judges can verify the ingestion efficiency directly.
@@ -213,6 +215,8 @@ The evaluation suite validates representative profiles across multiple states an
 - Structured reasoning completeness.
 - URL and certainty guardrails.
 - Hallucination-related failure modes.
+
+State-branded program names (for example, `TEXAS MEDICAID`, `MEDI-CAL`, and `CALFRESH`) are normalized to their federal equivalents (`MEDICAID` and `SNAP`) before scoring using the `normalize_benefit_name()` function. This prevents false-negative F1 penalties when the LLM correctly identifies a program but uses a state-specific name. The hallucination taxonomy (`ALLOWED_BENEFITS_TAXONOMY`) covers state-branded aliases for California, New York, Florida, Ohio, and Georgia in addition to all standard federal program names.
 
 Run the RAG integrity check separately when validating ingestion behavior:
 

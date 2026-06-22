@@ -1,6 +1,8 @@
 import json
 import os
+import re
 from typing import List, Literal, Optional
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
@@ -68,11 +70,6 @@ def _llm() -> ChatGroq:
         timeout=45,
         max_retries=2,
     )
-
-
-import re
-from urllib.parse import urlparse
-
 
 def _apply_guardrails(action_plan: dict, policy_matches: dict) -> dict:
     # Guardrail 1: Strict Program Alignment
